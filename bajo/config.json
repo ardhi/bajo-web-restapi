@@ -1,0 +1,24 @@
+{
+  "alias": "restapi",
+  "prefix": "api",
+  "appAsRoute": true,
+  "dbRec": {
+    "dataOnly": false
+  },
+  "key": {
+    "qs": {
+      "query": "query",
+      "page": "page",
+      "limit": "limit",
+      "sort": "sort"
+    },
+    "response": {
+      "data": "data",
+      "rows": "data",
+      "oldData": "oldData",
+      "page": "page",
+      "count": "count",
+      "pages": "pages"
+    }
+  }
+}
