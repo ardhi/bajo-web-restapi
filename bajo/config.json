@@ -2,8 +2,11 @@
   "alias": "restapi",
   "prefix": "api",
   "appAsRoute": true,
-  "dbRec": {
-    "dataOnly": false
+  "exposeHead": true,
+  "bodyLimit": 1048576,
+  "dbRepo": {
+    "dataOnly": false,
+    "patchDisabled": true
   },
   "key": {
     "qs": {

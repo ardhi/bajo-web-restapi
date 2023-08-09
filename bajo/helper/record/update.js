@@ -1,6 +1,6 @@
 async function update ({ repo, req, reply, id, body }) {
-  const { pascalCase, error } = this.bajo.helper
-  if (!this.bajoDb) throw error('\'%s\' is not loaded yet')
+  const { pascalCase, getPlugin } = this.bajo.helper
+  await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordUpdate } = this.bajoDb.helper
   const { getParams, transformResult } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo', 'id')

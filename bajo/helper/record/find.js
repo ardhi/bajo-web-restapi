@@ -1,6 +1,6 @@
 async function find ({ repo, req, reply }) {
-  const { pascalCase, error } = this.bajo.helper
-  if (!this.bajoDb) throw error('\'%s\' is not loaded yet')
+  const { pascalCase, getPlugin } = this.bajo.helper
+  await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordFind } = this.bajoDb.helper
   const { getFilter, getParams, transformResult } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo')
