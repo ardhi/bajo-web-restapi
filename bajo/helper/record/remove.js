@@ -1,4 +1,4 @@
-async function remove ({ repo, req, reply, id }) {
+async function remove ({ repo, req, id }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordRemove } = this.bajoDb.helper

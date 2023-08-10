@@ -1,7 +1,7 @@
 {
   "alias": "restapi",
   "prefix": "api",
-  "appAsRoute": true,
+  "mountAppAsRoot": true,
   "exposeHead": true,
   "bodyLimit": 1048576,
   "dbRepo": {

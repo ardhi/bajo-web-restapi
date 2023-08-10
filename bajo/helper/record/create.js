@@ -1,4 +1,4 @@
-async function create ({ repo, req, reply, body }) {
+async function create ({ repo, req, body }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordCreate } = this.bajoDb.helper

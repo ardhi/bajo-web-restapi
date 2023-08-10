@@ -1,4 +1,4 @@
-async function find ({ repo, req, reply }) {
+async function find ({ repo, req }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordFind } = this.bajoDb.helper

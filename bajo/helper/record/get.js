@@ -1,4 +1,4 @@
-async function get ({ repo, req, reply, id }) {
+async function get ({ repo, req, id }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordGet } = this.bajoDb.helper
