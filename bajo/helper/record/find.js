@@ -1,14 +1,15 @@
-async function find ({ repo, req }) {
-  const { pascalCase, getPlugin } = this.bajo.helper
+async function find ({ repo, req, reply }) {
+  const { pascalCase, getPlugin, importPkg } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
+  const { merge } = await importPkg('lodash-es')
   const { recordFind } = this.bajoDb.helper
   const { getFilter, getParams, transformResult } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo')
   const { fields, dataOnly } = params
   repo = repo || params.repo
   const options = { dataOnly, fields }
-  const result = await recordFind(pascalCase(repo), getFilter(req), options)
-  return dataOnly ? result : await transformResult(result, true)
+  const data = await recordFind(pascalCase(repo), getFilter(req), { fields, dataOnly: false })
+  return await transformResult({ data, req, reply, options: merge({ forFind: true }, options) })
 }
 
 export default find

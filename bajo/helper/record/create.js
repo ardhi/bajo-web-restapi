@@ -1,4 +1,4 @@
-async function create ({ repo, req, body }) {
+async function create ({ repo, req, reply, body }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordCreate } = this.bajoDb.helper
@@ -8,8 +8,8 @@ async function create ({ repo, req, body }) {
   repo = repo || params.repo
   body = body || params.body
   const options = { dataOnly, fields }
-  const result = await recordCreate(pascalCase(repo), body, options)
-  return dataOnly ? result : await transformResult(result)
+  const data = await recordCreate(pascalCase(repo), body, { fields, dataOnly: false })
+  return await transformResult({ data, req, reply, options })
 }
 
 export default create

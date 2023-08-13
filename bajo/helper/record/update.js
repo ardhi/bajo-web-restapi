@@ -1,4 +1,4 @@
-async function update ({ repo, req, id, body }) {
+async function update ({ repo, req, reply, id, body }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordUpdate } = this.bajoDb.helper
@@ -9,8 +9,8 @@ async function update ({ repo, req, id, body }) {
   body = body || params.body
   id = id || params.id
   const options = { dataOnly, fields }
-  const result = await recordUpdate(pascalCase(repo), id, body, options)
-  return dataOnly ? result : await transformResult(result)
+  const data = await recordUpdate(pascalCase(repo), id, body, { fields, dataOnly: false })
+  return await transformResult({ data, req, reply, options })
 }
 
 export default update

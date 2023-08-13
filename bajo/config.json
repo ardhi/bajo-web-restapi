@@ -21,7 +21,9 @@
       "oldData": "oldData",
       "page": "page",
       "count": "count",
-      "pages": "pages"
+      "pages": "pages",
+      "success": "success",
+      "statusCode": "code"
     }
   }
 }

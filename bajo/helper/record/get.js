@@ -1,4 +1,4 @@
-async function get ({ repo, req, id }) {
+async function get ({ repo, req, reply, id }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordGet } = this.bajoDb.helper
@@ -8,8 +8,8 @@ async function get ({ repo, req, id }) {
   repo = repo || params.repo
   id = id || params.id
   const options = { dataOnly, fields }
-  const result = await recordGet(pascalCase(repo), id, options)
-  return dataOnly ? result : await transformResult(result)
+  const data = await recordGet(pascalCase(repo), id, { fields, dataOnly: false })
+  return await transformResult({ data, req, reply, options })
 }
 
 export default get
