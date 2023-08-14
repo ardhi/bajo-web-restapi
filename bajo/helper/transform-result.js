@@ -18,10 +18,12 @@ async function returnError ({ data, req, reply, options = {} }) {
   const restapi = pascalCase(cfg.alias)
   data.success = false
   data.error = print.__(map(kebabCase(data.constructor.name).split('-'), s => upperFirst(s)).join(' '))
-  each(keys(data), k => {
-    reply.header(`X-${restapi}-${pascalCase(k)}`, data[k])
-  })
-  reply.code(data.statusCode || 500)
+  if (reply) {
+    each(keys(data), k => {
+      reply.header(`X-${restapi}-${pascalCase(k)}`, data[k])
+    })
+    reply.code(data.statusCode || 500)
+  }
   if (cfg.dbRepo.dataOnly) return ''
   return reformat.call(this, { data, req, reply, options })
 }
@@ -31,14 +33,16 @@ async function returnSuccess ({ data, req, reply, options = {} }) {
   const { each, keys, omit, get } = await importPkg('lodash-es')
   const cfg = getConfig('bajoWebRestapi', { full: true })
   const restapi = pascalCase(cfg.alias)
-  reply.code(200)
-  reply.header(`X-${restapi}-Success`, true)
-  if (cfg.dbRepo.dataOnly) {
-    each(keys(omit(data, ['data'])), k => {
-      const key = get(cfg, `key.response.${k}`, k)
-      reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])
-    })
-    return data.data
+  if (reply) {
+    reply.code(200)
+    reply.header(`X-${restapi}-Success`, true)
+    if (cfg.dbRepo.dataOnly) {
+      each(keys(omit(data, ['data'])), k => {
+        const key = get(cfg, `key.response.${k}`, k)
+        reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])
+      })
+      return data.data
+    }
   }
   return reformat.call(this, { data, req, reply, options })
 }

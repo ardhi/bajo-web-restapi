@@ -3,6 +3,7 @@ import routeByRepoBuilder from '../lib/route-by-repo-builder.js'
 import routeByVerb from '../lib/route-by-verb.js'
 import notFound from '../lib/not-found.js'
 import error from '../lib/error.js'
+import doc from '../lib/doc.js'
 
 async function boot () {
   const { getConfig, importPkg, eachPlugins } = this.bajo.helper
@@ -13,6 +14,9 @@ async function boot () {
   await this.bajoWeb.instance.register(async (ctx) => {
     await ctx.register(bodyParser)
     await error.call(this, ctx)
+    if (cfg.doc.enabled) {
+      await doc.call(this, ctx)
+    }
     await eachPlugins(async function ({ dir, alias, plugin }) {
       const appPrefix = cfg.mountAppAsRoot ? '' : alias
       const pattern = [

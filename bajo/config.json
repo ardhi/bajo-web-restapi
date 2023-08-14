@@ -6,14 +6,42 @@
   "bodyLimit": 1048576,
   "dbRepo": {
     "dataOnly": false,
-    "patchDisabled": true
+    "patchEnabled": false
+  },
+  "doc": {
+    "enabled": true,
+    "swagger": {
+      "openapi": {
+        "info": {
+          "title": "API Documentation"
+        },
+        "components": {
+          "securitySchemes": {}
+        },
+        "security": []
+      },
+      "hideUntagged": true
+    },
+    "swaggerUi": {
+      "routePrefix": "documentation",
+      "uiConfig": {
+        "deepLinking": true
+      },
+      "staticCSP": true,
+      "transformSpecificationClone": true,
+      "exposeRoute": true,
+      "theme": {
+        "title": "API Documentation"
+      }
+    }
   },
   "key": {
     "qs": {
       "query": "query",
       "page": "page",
       "limit": "limit",
-      "sort": "sort"
+      "sort": "sort",
+      "fields": "fields"
     },
     "response": {
       "data": "data",
