@@ -25,7 +25,10 @@
     "swaggerUi": {
       "routePrefix": "documentation",
       "uiConfig": {
-        "deepLinking": true
+        "deepLinking": true,
+        "defaultModelsExpandDepth": -1,
+        "displayRequestDuration": true,
+        "filter": true
       },
       "staticCSP": true,
       "transformSpecificationClone": true,

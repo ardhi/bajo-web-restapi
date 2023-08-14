@@ -23,49 +23,103 @@ async function buildPropsReqs (schema, method) {
   return { properties, required }
 }
 
-async function buildResponse (schema, method) {
+async function buildErrResp (ctx) {
+  const { importPkg } = this.bajo.helper
+  const { cloneDeep, merge } = await importPkg('lodash-es')
+  const def = {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', default: false },
+      error: { type: 'string' },
+      message: { type: 'string' }
+    }
+  }
+  for (const type of ['4xx', '5xx']) {
+    const item = cloneDeep(def)
+    if (type === '4xx') {
+      merge(item, {
+        properties: {
+          details: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                field: { type: 'string' },
+                error: { type: 'string' }
+              }
+            }
+          },
+          statusCode: { type: 'integer', default: 400 }
+        }
+      })
+    } else {
+      merge(item, {
+        properties: {
+          statusCode: { type: 'integer', default: 500 }
+        }
+      })
+    }
+    await lib.call(this, ctx, type + 'Resp', item)
+  }
+}
+
+async function buildResponse (ctx, schema, method) {
   const { print, getConfig } = this.bajo.helper
   const { transformResult } = this.bajoWebRestapi.helper
   const cfg = getConfig('bajoWebRestapi', { full: true })
-  const { properties, required } = await buildPropsReqs.call(this, schema, method)
+  const { properties } = await buildPropsReqs.call(this, schema, method)
+  await buildErrResp.call(this, ctx)
 
-  function buildData (keys) {
+  async function buildData (keys) {
     const data = {}
     for (const k of keys) {
-      data[k] = {
+      const name = 'repo' + schema.name
+      await lib.call(this, ctx, name, {
         type: 'object',
-        properties,
-        required
-      }
+        properties
+      })
+      data[k] = { $ref: name + '#' }
     }
     return data
   }
 
   const result = {
-    200: {
+    '2xx': {
       description: print.__('Successfull response'),
       type: 'object'
     }
   }
+  if (['create', 'update'].includes(method)) {
+    result['4xx'] = {
+      description: print.__('Document error response'),
+      $ref: '4xxResp#'
+    }
+  }
+  result['5xx'] = {
+    description: print.__('General error response'),
+    $ref: '5xxResp#'
+  }
   if (cfg.dbRepo.dataOnly) {
-    result['200'].properties = properties
+    if (method === 'find') {
+      result['2xx'] = {
+        type: 'array',
+        items: (await buildData.call(this, ['data'])).data
+      }
+    } else result['2xx'] = (await buildData.call(this, ['data'])).data
     return result
   }
   if (['create', 'get'].includes(method)) {
-    result['200'].properties = await transformResult({ data: buildData(['data']) })
+    result['2xx'].properties = await transformResult({ data: await buildData.call(this, ['data']) })
   } else if (['update', 'patch'].includes(method)) {
-    result['200'].properties = await transformResult({ data: buildData(['data', 'oldData']) })
+    result['2xx'].properties = await transformResult({ data: await buildData.call(this, ['data', 'oldData']) })
   } else if (['remove'].includes(method)) {
-    result['200'].properties = await transformResult({ data: buildData(['oldData']) })
+    result['2xx'].properties = await transformResult({ data: await buildData.call(this, ['oldData']) })
   } else if (['find'].includes(method)) {
-    result['200'].properties = await transformResult({
+    result['2xx'].properties = await transformResult({
       data: {
         data: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties
-          }
+          items: (await buildData.call(this, ['data'])).data
         },
         limit: { type: 'integer' },
         page: { type: 'integer' },
@@ -78,19 +132,28 @@ async function buildResponse (schema, method) {
   return result
 }
 
-async function docSchema ({ repo, method }) {
+async function lib (ctx, name, obj) {
+  const { importPkg } = this.bajo.helper
+  const { merge } = await importPkg('lodash-es')
+  if (ctx.getSchema(name)) return
+  const value = merge({}, obj, { $id: name })
+  ctx.addSchema(value)
+}
+
+async function docSchema ({ repo, method, ctx, options = {} }) {
   const { print, getConfig, importPkg } = this.bajo.helper
   const { getInfo } = this.bajoDb.helper
   const { schema } = await getInfo(repo)
-  const { each, keys } = await importPkg('lodash-es')
+  const { each, keys, omit } = await importPkg('lodash-es')
   const cfg = getConfig(schema.plugin, { full: true })
   const cfgApi = getConfig('bajoWebRestapi')
+  const cfgDb = getConfig('bajoDb')
   const out = {
-    description: print.__(desc[method]),
-    tags: [cfg.alias]
+    description: options.description || print.__(desc[method]),
+    tags: [cfg.alias.toUpperCase(), ...(options.alias || [])]
   }
   if (['find'].includes(method)) {
-    out.querystring = {
+    const def = {
       type: 'object',
       properties: {
         query: {
@@ -100,7 +163,7 @@ async function docSchema ({ repo, method }) {
         limit: {
           type: 'integer',
           description: print.__('Number of records per page. Must be >= 1'),
-          default: 25
+          default: cfgDb.defaults.filter.limit
         },
         page: {
           type: 'integer',
@@ -120,12 +183,14 @@ async function docSchema ({ repo, method }) {
     each(keys(cfgApi.key.qs), k => {
       const v = cfgApi.key.qs[k]
       if (k === v) return undefined
-      out.querystring.properties[v] = out.querystring.properties[k]
-      delete out.querystring.properties[k]
+      def.properties[v] = def.properties[k]
+      delete def.properties[k]
     })
+    await lib.call(this, ctx, 'qsFilter', def)
+    out.querystring = { $ref: 'qsFilter#' }
   }
   if (['get', 'update', 'remove'].includes(method)) {
-    out.params = {
+    await lib.call(this, ctx, 'paramsId', {
       type: 'object',
       properties: {
         id: {
@@ -133,18 +198,29 @@ async function docSchema ({ repo, method }) {
           description: print.__('Record ID')
         }
       }
-    }
+    })
+    out.params = { $ref: 'paramsId#' }
   }
-  if (['create', 'update'].includes(method)) {
+  if (['update'].includes(method)) {
+    const { properties } = await buildPropsReqs.call(this, schema, method)
+    const name = 'repo' + schema.name + 'Update'
+    await lib.call(this, ctx, name, {
+      type: 'object',
+      properties: omit(properties, ['id'])
+    })
+    out.body = { $ref: name + '#' }
+  }
+  if (['create'].includes(method)) {
     const { properties, required } = await buildPropsReqs.call(this, schema, method)
-    out.body = {
+    const name = 'repo' + schema.name + 'Create'
+    await lib.call(this, ctx, name, {
       type: 'object',
       properties,
       required
-    }
-    if (method === 'update') delete out.body.properties.id
+    })
+    out.body = { $ref: name + '#' }
   }
-  out.response = await buildResponse.call(this, schema, method)
+  out.response = await buildResponse.call(this, ctx, schema, method)
   return out
 }
 

@@ -28,8 +28,8 @@ async function boot () {
       await ctx.register(async (childCtx) => {
         for (const file of files) {
           const base = path.basename(file, path.extname(file))
-          if (base === 'repo-builder') await routeByRepoBuilder.call(this, { file, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
-          else await routeByVerb.call(this, { file, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
+          if (base === 'repo-builder') await routeByRepoBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
+          else await routeByVerb.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
         }
       }, { prefix: appPrefix })
     })
