@@ -9,6 +9,8 @@ async function remove ({ repo, req, reply, id }) {
   id = id || params.id
   const options = { dataOnly, fields }
   const data = await recordRemove(pascalCase(repo), id, { fields, dataOnly: false })
+  data.success = true
+  data.statusCode = 200
   return await transformResult({ data, req, reply, options })
 }
 

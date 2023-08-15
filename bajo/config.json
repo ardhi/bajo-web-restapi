@@ -26,7 +26,6 @@
       "routePrefix": "documentation",
       "uiConfig": {
         "deepLinking": true,
-        "defaultModelsExpandDepth": -1,
         "displayRequestDuration": true,
         "filter": true
       },
@@ -54,7 +53,10 @@
       "count": "count",
       "pages": "pages",
       "success": "success",
-      "statusCode": "code"
+      "statusCode": "code",
+      "error": "error",
+      "message": "message",
+      "details": "details"
     }
   }
 }

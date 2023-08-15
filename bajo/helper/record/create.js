@@ -9,6 +9,8 @@ async function create ({ repo, req, reply, body }) {
   body = body || params.body
   const options = { dataOnly, fields }
   const data = await recordCreate(pascalCase(repo), body, { fields, dataOnly: false })
+  data.success = true
+  data.statusCode = 200
   return await transformResult({ data, req, reply, options })
 }
 

@@ -9,6 +9,8 @@ async function find ({ repo, req, reply }) {
   repo = repo || params.repo
   const options = { dataOnly, fields }
   const data = await recordFind(pascalCase(repo), getFilter(req), { fields, dataOnly: false })
+  data.success = true
+  data.statusCode = 200
   return await transformResult({ data, req, reply, options: merge({ forFind: true }, options) })
 }
 

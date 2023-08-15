@@ -13,19 +13,22 @@ async function reformat ({ data, req, reply, options = {} }) {
 
 async function returnError ({ data, req, reply, options = {} }) {
   const { print, importPkg, getConfig, pascalCase } = this.bajo.helper
-  const { map, kebabCase, upperFirst, keys, each } = await importPkg('lodash-es')
+  const { map, kebabCase, upperFirst, keys, each, get, isEmpty } = await importPkg('lodash-es')
   const cfg = getConfig('bajoWebRestapi', { full: true })
   const restapi = pascalCase(cfg.alias)
-  data.success = false
   data.error = print.__(map(kebabCase(data.constructor.name).split('-'), s => upperFirst(s)).join(' '))
-  if (reply) {
+  data.success = false
+  data.statusCode = data.statusCode || 500
+  if (reply && cfg.dbRepo.dataOnly) {
     each(keys(data), k => {
-      reply.header(`X-${restapi}-${pascalCase(k)}`, data[k])
+      const key = get(cfg, `key.response.${k}`, k)
+      if (k === 'details' && !isEmpty(data[k])) data[k] = JSON.stringify(data[k])
+      reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])
     })
-    reply.code(data.statusCode || 500)
   }
-  if (cfg.dbRepo.dataOnly) return ''
-  return reformat.call(this, { data, req, reply, options })
+  reply.code(data.statusCode)
+  const result = cfg.dbRepo.dataOnly ? { error: data.message } : data
+  return reformat.call(this, { data: result, req, reply, options })
 }
 
 async function returnSuccess ({ data, req, reply, options = {} }) {
@@ -35,7 +38,6 @@ async function returnSuccess ({ data, req, reply, options = {} }) {
   const restapi = pascalCase(cfg.alias)
   if (reply) {
     reply.code(200)
-    reply.header(`X-${restapi}-Success`, true)
     if (cfg.dbRepo.dataOnly) {
       each(keys(omit(data, ['data'])), k => {
         const key = get(cfg, `key.response.${k}`, k)

@@ -7,6 +7,7 @@ import doc from '../lib/doc.js'
 
 async function boot () {
   const { getConfig, importPkg, eachPlugins } = this.bajo.helper
+  const { docSchemaGeneral } = this.bajoWebRestapi.helper
   const [fastGlob, bodyParser] = await importPkg('fast-glob', 'bajo-web:@fastify/formbody')
   const cfg = getConfig('bajoWebRestapi')
   const pathPrefix = 'bajoWebRestapi/route'
@@ -14,11 +15,12 @@ async function boot () {
   await this.bajoWeb.instance.register(async (ctx) => {
     await ctx.register(bodyParser)
     await error.call(this, ctx)
+    await docSchemaGeneral(ctx)
     if (cfg.doc.enabled) {
       await doc.call(this, ctx)
     }
     await eachPlugins(async function ({ dir, alias, plugin }) {
-      const appPrefix = cfg.mountAppAsRoot ? '' : alias
+      const appPrefix = plugin === 'app' && cfg.mountAppAsRoot ? '' : alias
       const pattern = [
         `${dir}/${pathPrefix}/**/{find,get,create,update,remove}.js`,
         `${dir}/${pathPrefix}/**/repo-builder.*`
@@ -28,8 +30,8 @@ async function boot () {
       await ctx.register(async (childCtx) => {
         for (const file of files) {
           const base = path.basename(file, path.extname(file))
-          if (base === 'repo-builder') await routeByRepoBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
-          else await routeByVerb.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, prefix, appPrefix })
+          if (base === 'repo-builder') await routeByRepoBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
+          else await routeByVerb.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
         }
       }, { prefix: appPrefix })
     })

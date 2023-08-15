@@ -10,6 +10,8 @@ async function update ({ repo, req, reply, id, body }) {
   id = id || params.id
   const options = { dataOnly, fields }
   const data = await recordUpdate(pascalCase(repo), id, body, { fields, dataOnly: false })
+  data.success = true
+  data.statusCode = 200
   return await transformResult({ data, req, reply, options })
 }
 
