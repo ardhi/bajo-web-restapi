@@ -18,7 +18,7 @@ async function returnError ({ data, req, reply, options = {} }) {
   const restapi = pascalCase(cfg.alias)
   data.error = print.__(map(kebabCase(data.constructor.name).split('-'), s => upperFirst(s)).join(' '))
   data.success = false
-  data.statusCode = data.statusCode || 500
+  data.statusCode = data.statusCode ?? 500
   if (reply && cfg.dbRepo.dataOnly) {
     each(keys(data), k => {
       const key = get(cfg, `key.response.${k}`, k)

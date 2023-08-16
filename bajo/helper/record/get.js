@@ -5,8 +5,8 @@ async function get ({ repo, req, reply, id }) {
   const { getParams, transformResult } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo', 'id')
   const { fields, dataOnly } = params
-  repo = repo || params.repo
-  id = id || params.id
+  repo = repo ?? params.repo
+  id = id ?? params.id
   const options = { dataOnly, fields }
   const data = await recordGet(pascalCase(repo), id, { fields, dataOnly: false })
   data.success = true

@@ -85,8 +85,8 @@ async function docSchema ({ repo, method, ctx, options = {} }) {
   const { omit } = await importPkg('lodash-es')
   const cfg = getConfig(schema.plugin, { full: true })
   const out = {
-    description: options.description || docSchemaDescription(method),
-    tags: [cfg.alias.toUpperCase(), ...(options.alias || [])]
+    description: options.description ?? docSchemaDescription(method),
+    tags: [cfg.alias.toUpperCase(), ...(options.alias ?? [])]
   }
   if (['find'].includes(method)) {
     out.querystring = { $ref: 'qsFilter#' }

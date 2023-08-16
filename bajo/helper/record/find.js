@@ -6,7 +6,7 @@ async function find ({ repo, req, reply }) {
   const { getFilter, getParams, transformResult } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo')
   const { fields, dataOnly } = params
-  repo = repo || params.repo
+  repo = repo ?? params.repo
   const options = { dataOnly, fields }
   const data = await recordFind(pascalCase(repo), getFilter(req), { fields, dataOnly: false })
   data.success = true
