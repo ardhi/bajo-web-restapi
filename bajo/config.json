@@ -8,6 +8,7 @@
     "dataOnly": false,
     "patchEnabled": false
   },
+  "auth": ["basic", "apiKey", "jwt"],
   "doc": {
     "enabled": true,
     "swagger": {
