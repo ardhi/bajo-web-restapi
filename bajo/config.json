@@ -58,5 +58,6 @@
       "message": "message",
       "details": "details"
     }
-  }
+  },
+  "dependencies": ["bajo-db"]
 }

@@ -8,7 +8,8 @@ async function find ({ repo, req, reply }) {
   const { fields, dataOnly } = params
   repo = repo ?? params.repo
   const options = { dataOnly, fields }
-  const data = await recordFind(pascalCase(repo), getFilter(req), { fields, dataOnly: false })
+  const filter = await getFilter(req)
+  const data = await recordFind(pascalCase(repo), filter, { fields, dataOnly: false })
   data.success = true
   data.statusCode = 200
   return await transformResult({ data, req, reply, options: merge({ forFind: true }, options) })
