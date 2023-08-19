@@ -13,6 +13,7 @@ async function boot () {
   const pathPrefix = 'bajoWebRestapi/route'
   const prefix = cfg.prefix
   await this.bajoWeb.instance.register(async (ctx) => {
+    this.bajoWebRestapi.context = ctx
     await ctx.register(bodyParser)
     await error.call(this, ctx)
     await docSchemaGeneral(ctx)
