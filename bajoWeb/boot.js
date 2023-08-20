@@ -6,14 +6,17 @@ import error from '../lib/error.js'
 import doc from '../lib/doc.js'
 
 async function boot () {
-  const { getConfig, importPkg, eachPlugins } = this.bajo.helper
+  const { getConfig, importPkg, eachPlugins, importModule } = this.bajo.helper
   const { docSchemaGeneral } = this.bajoWebRestapi.helper
   const [fastGlob, bodyParser] = await importPkg('fast-glob', 'bajo-web:@fastify/formbody')
   const cfg = getConfig('bajoWebRestapi')
   const pathPrefix = 'bajoWebRestapi/route'
   const prefix = cfg.prefix
+  const cfgWeb = getConfig('bajoWeb', { full: true })
+  const routeHook = await importModule(`${cfgWeb.dir}/lib/route-hook.js`)
   await this.bajoWeb.instance.register(async (ctx) => {
-    this.bajoWebRestapi.context = ctx
+    this.bajoWebRestapi.instance = ctx
+    await routeHook.call(this, ctx, 'bajoWebRestapi')
     await ctx.register(bodyParser)
     await error.call(this, ctx)
     await docSchemaGeneral(ctx)
