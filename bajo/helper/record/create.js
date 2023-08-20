@@ -2,16 +2,12 @@ async function create ({ repo, req, reply, body }) {
   const { pascalCase, getPlugin } = this.bajo.helper
   await getPlugin('bajoDb') // ensure bajoDb is loaded
   const { recordCreate } = this.bajoDb.helper
-  const { getParams, transformResult } = this.bajoWebRestapi.helper
+  const { getParams } = this.bajoWebRestapi.helper
   const params = await getParams(req, 'repo')
-  const { fields, dataOnly } = params
+  const { fields } = params
   repo = repo ?? params.repo
   body = body ?? params.body
-  const options = { dataOnly, fields }
-  const data = await recordCreate(pascalCase(repo), body, { fields, dataOnly: false })
-  data.success = true
-  data.statusCode = 200
-  return await transformResult({ data, req, reply, options })
+  return await recordCreate(pascalCase(repo), body, { fields, dataOnly: false, req })
 }
 
 export default create
