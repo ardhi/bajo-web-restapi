@@ -19,7 +19,7 @@ async function buildResponse (ctx, schema, method) {
   const { print, getConfig, importPkg } = this.bajo.helper
   const { transformResult, docSchemaLib, docSchemaForFind } = this.bajoWebRestapi.helper
   const { merge, cloneDeep } = await importPkg('lodash-es')
-  const cfg = getConfig('bajoWebRestapi', { full: true })
+  const cfgWeb = getConfig('bajoWeb')
   const { properties } = await buildPropsReqs.call(this, schema, method)
 
   async function buildData (keys) {
@@ -51,7 +51,7 @@ async function buildResponse (ctx, schema, method) {
     description: print.__('General error response'),
     $ref: '5xxResp#'
   }
-  if (cfg.dbRepo.dataOnly) {
+  if (cfgWeb.dbRepo.dataOnly) {
     if (method === 'find') {
       result['2xx'] = {
         type: 'array',

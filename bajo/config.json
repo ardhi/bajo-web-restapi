@@ -4,10 +4,6 @@
   "mountAppAsRoot": true,
   "exposeHead": true,
   "bodyLimit": 1048576,
-  "dbRepo": {
-    "dataOnly": false,
-    "patchEnabled": false
-  },
   "doc": {
     "enabled": true,
     "swagger": {
@@ -37,27 +33,18 @@
       }
     }
   },
-  "key": {
-    "qs": {
-      "query": "query",
-      "page": "page",
-      "limit": "limit",
-      "sort": "sort",
-      "fields": "fields"
-    },
-    "response": {
-      "data": "data",
-      "rows": "data",
-      "oldData": "oldData",
-      "page": "page",
-      "count": "count",
-      "pages": "pages",
-      "success": "success",
-      "statusCode": "code",
-      "error": "error",
-      "message": "message",
-      "details": "details"
-    }
+  "responseKey": {
+    "data": "data",
+    "rows": "data",
+    "oldData": "oldData",
+    "page": "page",
+    "count": "count",
+    "pages": "pages",
+    "success": "success",
+    "statusCode": "code",
+    "error": "error",
+    "message": "message",
+    "details": "details"
   },
   "dependencies": ["bajo-db"]
 }

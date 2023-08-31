@@ -1,4 +1,5 @@
 import path from 'path'
+import decorate from '../lib/decorate.js'
 import routeByRepoBuilder from '../lib/route-by-repo-builder.js'
 import routeByVerb from '../lib/route-by-verb.js'
 import notFound from '../lib/not-found.js'
@@ -20,6 +21,7 @@ const boot = {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
       await routeHook.call(this, 'bajoWebRestapi')
+      await decorate.call(this, ctx)
       await ctx.register(bodyParser)
       await error.call(this, ctx)
       await docSchemaGeneral(ctx)

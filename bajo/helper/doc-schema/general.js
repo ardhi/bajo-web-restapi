@@ -3,6 +3,7 @@ async function buildErrResp (ctx) {
   const { docSchemaLib } = this.bajoWebRestapi.helper
   const { cloneDeep, merge, each, get } = await importPkg('lodash-es')
   const cfg = getConfig('bajoWebRestapi')
+  const cfgWeb = getConfig('bajoWeb')
   const def = {
     type: 'object',
     properties: {
@@ -37,10 +38,10 @@ async function buildErrResp (ctx) {
         }
       })
     }
-    if (cfg.dbRepo.dataOnly) item.properties = { error: item.properties.message }
+    if (cfgWeb.dbRepo.dataOnly) item.properties = { error: item.properties.message }
     const props = {}
     each(item.properties, (v, k) => {
-      const key = get(cfg, `key.response.${k}`, k)
+      const key = get(cfg, `responseKey.${k}`, k)
       props[key] = item.properties[k]
     })
     item.properties = props
