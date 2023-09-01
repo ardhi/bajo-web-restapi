@@ -13,9 +13,10 @@ const boot = {
     const { docSchemaGeneral } = this.bajoWebRestapi.helper
     const [fastGlob, bodyParser] = await importPkg('fast-glob', 'bajo-web:@fastify/formbody')
     const cfg = getConfig('bajoWebRestapi')
-    const pathPrefix = 'bajoWebRestapi/route'
-    const prefix = cfg.prefix
     const cfgWeb = getConfig('bajoWeb', { full: true })
+    const pathPrefix = 'bajoWebRestapi/route'
+    let prefix = cfg.prefix === '' ? '' : ('/' + cfg.prefix)
+    if (cfg.i18nDetectors.includes('path')) prefix = `/:lang${prefix}`
     const routeHook = await importModule(`${cfgWeb.dir}/lib/route-hook.js`)
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx

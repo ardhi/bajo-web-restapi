@@ -4,6 +4,7 @@
   "mountAppAsRoot": true,
   "exposeHead": true,
   "bodyLimit": 1048576,
+  "i18nDetectors": ["qs", "header"],
   "doc": {
     "enabled": true,
     "swagger": {
