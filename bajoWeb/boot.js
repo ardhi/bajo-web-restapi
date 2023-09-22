@@ -18,12 +18,14 @@ const boot = {
     let prefix = cfg.prefix === '' ? '' : ('/' + cfg.prefix)
     if (cfg.i18nDetectors.includes('path')) prefix = `/:lang${prefix}`
     const routeHook = await importModule(`${cfgWeb.dir}/lib/route-hook.js`)
+    const handleMultipart = await importModule(`${cfgWeb.dir}/lib/handle-multipart.js`)
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
       await routeHook.call(this, 'bajoWebRestapi')
       await decorate.call(this, ctx)
       await ctx.register(bodyParser)
+      await handleMultipart.call(this, ctx, cfg.multipart)
       await error.call(this, ctx)
       await docSchemaGeneral(ctx)
       if (cfg.doc.enabled) {
