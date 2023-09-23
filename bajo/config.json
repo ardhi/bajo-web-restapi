@@ -48,7 +48,6 @@
     "details": "details"
   },
   "multipart": {
-    "attachFieldsToBody": true
   },
   "dependencies": ["bajo-db"]
 }
