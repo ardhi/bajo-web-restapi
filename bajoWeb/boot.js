@@ -16,7 +16,7 @@ const boot = {
     const cfgWeb = getConfig('bajoWeb', { full: true })
     const pathPrefix = 'bajoWebRestapi/route'
     let prefix = cfg.prefix === '' ? '' : ('/' + cfg.prefix)
-    if (cfg.i18nDetectors.includes('path')) prefix = `/:lang${prefix}`
+    if (cfg.i18n.detectors.includes('path')) prefix = `/:lang${prefix}`
     const routeHook = await importModule(`${cfgWeb.dir}/lib/route-hook.js`)
     const handleMultipart = await importModule(`${cfgWeb.dir}/lib/handle-multipart-body.js`)
     await this.bajoWeb.instance.register(async (ctx) => {

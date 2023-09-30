@@ -4,7 +4,10 @@
   "mountAppAsRoot": true,
   "exposeHead": true,
   "bodyLimit": 1048576,
-  "i18nDetectors": ["qs", "header"],
+  "i18n": {
+    "detectors": ["qs", "header"],
+    "defaultNs": ["bajoDb", "bajoWebRestapi"]
+  },
   "doc": {
     "enabled": true,
     "swagger": {

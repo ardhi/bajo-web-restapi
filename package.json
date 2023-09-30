@@ -1,6 +1,6 @@
 {
   "name": "bajo-web-restapi",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "REST API Web Server Plugin for Bajo Framework",
   "main": "index.js",
   "scripts": {
