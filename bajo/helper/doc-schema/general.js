@@ -38,7 +38,7 @@ async function buildErrResp (ctx) {
         }
       })
     }
-    if (cfgWeb.dbRepo.dataOnly) item.properties = { error: item.properties.message }
+    if (cfgWeb.dbColl.dataOnly) item.properties = { error: item.properties.message }
     const props = {}
     each(item.properties, (v, k) => {
       const key = get(cfg, `responseKey.${k}`, k)

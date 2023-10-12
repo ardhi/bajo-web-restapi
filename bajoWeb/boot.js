@@ -1,6 +1,6 @@
 import path from 'path'
 import decorate from '../lib/decorate.js'
-import routeByRepoBuilder from '../lib/route-by-repo-builder.js'
+import routeByCollBuilder from '../lib/route-by-coll-builder.js'
 import routeByVerb from '../lib/route-by-verb.js'
 import notFound from '../lib/not-found.js'
 import error from '../lib/error.js'
@@ -35,14 +35,14 @@ const boot = {
         const appPrefix = plugin === 'app' && cfg.mountAppAsRoot ? '' : alias
         const pattern = [
           `${dir}/${pathPrefix}/**/{find,get,create,update,remove}.js`,
-          `${dir}/${pathPrefix}/**/repo-builder.*`
+          `${dir}/${pathPrefix}/**/coll-builder.*`
         ]
         const files = await fastGlob(pattern)
         if (files.length === 0) return undefined
         await ctx.register(async (childCtx) => {
           for (const file of files) {
             const base = path.basename(file, path.extname(file))
-            if (base === 'repo-builder') await routeByRepoBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
+            if (base === 'coll-builder') await routeByCollBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
             else await routeByVerb.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
           }
         }, { prefix: appPrefix })

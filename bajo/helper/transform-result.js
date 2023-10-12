@@ -20,7 +20,7 @@ async function returnError ({ data, req, reply, options = {} }) {
   data.error = print.__(map(kebabCase(data.constructor.name).split('-'), s => upperFirst(s)).join(' '))
   data.success = false
   data.statusCode = data.statusCode ?? 500
-  if (reply && cfgWeb.dbRepo.dataOnly) {
+  if (reply && cfgWeb.dbColl.dataOnly) {
     each(keys(data), k => {
       const key = get(cfg, `responseKey.${k}`, k)
       if (k === 'details' && !isEmpty(data[k])) data[k] = JSON.stringify(data[k])
@@ -28,7 +28,7 @@ async function returnError ({ data, req, reply, options = {} }) {
     })
   }
   reply.code(data.statusCode)
-  const result = cfgWeb.dbRepo.dataOnly ? { error: data.message } : data
+  const result = cfgWeb.dbColl.dataOnly ? { error: data.message } : data
   return reformat.call(this, { data: result, req, reply, options })
 }
 
@@ -40,7 +40,7 @@ async function returnSuccess ({ data, req, reply, options = {} }) {
   const restapi = pascalCase(cfg.alias)
   if (reply) {
     reply.code(200)
-    if (cfgWeb.dbRepo.dataOnly) {
+    if (cfgWeb.dbColl.dataOnly) {
       each(keys(omit(data, ['data'])), k => {
         const key = get(cfg, `responseKey.${k}`, k)
         reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])

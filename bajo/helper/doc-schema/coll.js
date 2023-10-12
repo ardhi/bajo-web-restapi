@@ -25,7 +25,7 @@ async function buildResponse (ctx, schema, method) {
   async function buildData (keys) {
     const data = {}
     for (const k of keys) {
-      const name = 'repo' + schema.name
+      const name = 'coll' + schema.name
       await docSchemaLib(ctx, name, {
         type: 'object',
         properties: cloneDeep(properties)
@@ -51,7 +51,7 @@ async function buildResponse (ctx, schema, method) {
     description: print.__('General error response'),
     $ref: '5xxResp#'
   }
-  if (cfgWeb.dbRepo.dataOnly) {
+  if (cfgWeb.dbColl.dataOnly) {
     if (method === 'find') {
       result['2xx'] = {
         type: 'array',
@@ -77,11 +77,11 @@ async function buildResponse (ctx, schema, method) {
   return result
 }
 
-async function docSchema ({ repo, method, ctx, options = {} }) {
+async function docSchema ({ coll, method, ctx, options = {} }) {
   const { getConfig, importPkg } = this.bajo.helper
   const { docSchemaDescription, docSchemaLib } = this.bajoWebRestapi.helper
   const { getInfo } = this.bajoDb.helper
-  const { schema } = await getInfo(repo)
+  const { schema } = await getInfo(coll)
   const { omit } = await importPkg('lodash-es')
   const cfg = getConfig(schema.plugin, { full: true })
   const out = {
@@ -97,7 +97,7 @@ async function docSchema ({ repo, method, ctx, options = {} }) {
   }
   if (['update'].includes(method)) {
     const { properties } = await buildPropsReqs.call(this, schema, method)
-    const name = 'repo' + schema.name + 'Update'
+    const name = 'coll' + schema.name + 'Update'
     await docSchemaLib(ctx, name, {
       type: 'object',
       properties: omit(properties, ['id'])
@@ -106,7 +106,7 @@ async function docSchema ({ repo, method, ctx, options = {} }) {
   }
   if (['create'].includes(method)) {
     const { properties, required } = await buildPropsReqs.call(this, schema, method)
-    const name = 'repo' + schema.name + 'Create'
+    const name = 'coll' + schema.name + 'Create'
     await docSchemaLib(ctx, name, {
       type: 'object',
       properties,
