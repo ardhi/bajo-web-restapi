@@ -31,6 +31,7 @@ const boot = {
       if (cfg.doc.enabled) {
         await doc.call(this, ctx)
       }
+      await runHook('bajoWebRestapi:beforeCreateRoutes', ctx)
       await eachPlugins(async function ({ dir, alias, plugin }) {
         const appPrefix = plugin === 'app' && cfg.mountAppAsRoot ? '' : alias
         const pattern = [
@@ -47,6 +48,7 @@ const boot = {
           }
         }, { prefix: appPrefix })
       })
+      await runHook('bajoWebRestapi:afterCreateRoutes', ctx)
       await notFound.call(this, ctx)
     }, { prefix })
   }
