@@ -5,7 +5,7 @@ async function buildPropsReqs (schema, method) {
     let type = 'string'
     if (['float', 'double'].includes(p.type)) type = 'number'
     if (['boolean'].includes(p.type)) type = 'boolean'
-    if (['integer'].includes(p.type)) type = 'integer'
+    if (['integer', 'smallint'].includes(p.type)) type = 'integer'
     if (['object'].includes(p.type)) type = 'object'
     properties[p.name] = { type }
     if (!p.required) properties[p.name].nullable = true
