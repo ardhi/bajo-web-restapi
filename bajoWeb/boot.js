@@ -31,11 +31,13 @@ const boot = {
       if (cfg.doc.enabled) {
         await doc.call(this, ctx)
       }
+      const actions = ['find', 'get', 'create', 'update', 'remove']
+      if (cfg.enablePatch) actions.push('replace')
       await runHook('bajoWebRestapi:beforeCreateRoutes', ctx)
       await eachPlugins(async function ({ dir, alias, plugin }) {
         const appPrefix = plugin === 'app' && cfg.mountAppAsRoot ? '' : alias
         const pattern = [
-          `${dir}/${pathPrefix}/**/{find,get,create,update,remove}.js`,
+          `${dir}/${pathPrefix}/**/{${actions.join(',')}}.js`,
           `${dir}/${pathPrefix}/**/coll-builder.*`
         ]
         const files = await fastGlob(pattern)

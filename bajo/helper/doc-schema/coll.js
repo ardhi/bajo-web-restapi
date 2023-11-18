@@ -41,7 +41,7 @@ async function buildResponse (ctx, schema, method) {
       type: 'object'
     }
   }
-  if (['create', 'update'].includes(method)) {
+  if (['create', 'update', 'replace'].includes(method)) {
     result['4xx'] = {
       description: print.__('Document error response'),
       $ref: '4xxResp#'
@@ -61,10 +61,11 @@ async function buildResponse (ctx, schema, method) {
     return result
   }
   const success = { type: 'boolean', default: true }
-  const statusCode = { type: 'integer', default: 200 }
+  let statusCode = { type: 'integer', default: 200 }
   if (['create', 'get'].includes(method)) {
+    if (method === 'create') statusCode = 201
     result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
-  } else if (['update', 'patch'].includes(method)) {
+  } else if (['update', 'replace'].includes(method)) {
     result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data', 'oldData']), { success, statusCode }) })
   } else if (['remove'].includes(method)) {
     result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['oldData']), { success, statusCode }) })
@@ -91,7 +92,7 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
   if (['find'].includes(method)) {
     out.querystring = { $ref: 'qsFilter#' }
   }
-  if (['get', 'update', 'remove'].includes(method)) {
+  if (['get', 'update', 'replace', 'remove'].includes(method)) {
     out.querystring = { $ref: 'qsFields#' }
     out.params = { $ref: 'paramsId#' }
   }
@@ -101,6 +102,16 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
     await docSchemaLib(ctx, name, {
       type: 'object',
       properties: omit(properties, ['id'])
+    })
+    out.body = { $ref: name + '#' }
+  }
+  if (['replace'].includes(method)) {
+    const { properties, required } = await buildPropsReqs.call(this, schema, method)
+    const name = 'coll' + schema.name + 'Replace'
+    await docSchemaLib(ctx, name, {
+      type: 'object',
+      properties: omit(properties, ['id']),
+      required
     })
     out.body = { $ref: name + '#' }
   }

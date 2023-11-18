@@ -3,6 +3,7 @@
   "prefix": "api",
   "mountAppAsRoot": true,
   "exposeHead": true,
+  "enablePatch": false,
   "bodyLimit": 1048576,
   "i18n": {
     "detectors": ["qs", "header"],

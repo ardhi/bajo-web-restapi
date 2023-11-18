@@ -39,7 +39,7 @@ async function returnSuccess ({ data, req, reply, options = {} }) {
   const cfgWeb = getConfig('bajoWeb')
   const restapi = pascalCase(cfg.alias)
   if (reply) {
-    reply.code(200)
+    reply.code(req.method.toUpperCase() === 'POST' ? 201 : 200)
     if (cfgWeb.dbColl.dataOnly) {
       each(keys(omit(data, ['data'])), k => {
         const key = get(cfg, `responseKey.${k}`, k)
