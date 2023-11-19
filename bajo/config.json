@@ -48,6 +48,7 @@
     "success": "success",
     "statusCode": "code",
     "error": "error",
+    "cached": "cached",
     "message": "message",
     "details": "details"
   },
