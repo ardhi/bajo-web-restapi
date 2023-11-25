@@ -5,13 +5,15 @@ import routeByVerb from '../lib/route-by-verb.js'
 import notFound from '../lib/not-found.js'
 import error from '../lib/error.js'
 import doc from '../lib/doc.js'
+import handleResponse from '../lib/handle-response.js'
 
 const boot = {
   level: 10,
   handler: async function () {
     const { getConfig, importPkg, eachPlugins, importModule, runHook } = this.bajo.helper
     const { docSchemaGeneral } = this.bajoWebRestapi.helper
-    const [fastGlob, bodyParser] = await importPkg('fast-glob', 'bajo-web:@fastify/formbody')
+    const [fastGlob, bodyParser, accepts] = await importPkg('fast-glob',
+      'bajoWeb:@fastify/formbody', 'bajoWeb:@fastify/accepts')
     const cfg = getConfig('bajoWebRestapi')
     const cfgWeb = getConfig('bajoWeb', { full: true })
     const pathPrefix = 'bajoWebRestapi/route'
@@ -19,13 +21,19 @@ const boot = {
     if (cfg.i18n.detectors.includes('path')) prefix = `/:lang${prefix}`
     const routeHook = await importModule(`${cfgWeb.dir.pkg}/lib/route-hook.js`)
     const handleMultipart = await importModule(`${cfgWeb.dir.pkg}/lib/handle-multipart-body.js`)
+    const handleXmlBody = await importModule(`${cfgWeb.dir.pkg}/lib/handle-xml-body.js`)
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
       await routeHook.call(this, 'bajoWebRestapi')
       await decorate.call(this, ctx)
+      if (cfg.format.supported.includes('xml')) {
+        await handleXmlBody.call(this, ctx, cfg.format.xml.bodyParser)
+      }
+      await ctx.register(accepts)
       await ctx.register(bodyParser)
       await handleMultipart.call(this, ctx, cfg.multipart)
+      await handleResponse.call(this, ctx)
       await error.call(this, ctx)
       await docSchemaGeneral(ctx)
       if (cfg.doc.enabled) {

@@ -1,6 +1,8 @@
 {
   "alias": "restapi",
   "prefix": "api",
+  "formats": ["json"],
+  "formatAsExt": false,
   "mountAppAsRoot": true,
   "exposeHead": true,
   "enablePatch": false,
@@ -8,6 +10,21 @@
   "i18n": {
     "detectors": ["qs", "header"],
     "defaultNs": ["bajoDb", "bajoWebRestapi"]
+  },
+  "format": {
+    "supported": ["json", "xml"],
+    "asExt": false,
+    "xml": {
+      "bodyParser": {
+        "contentTypes": ["text/xml", "application/xml", "application/rss+xml"],
+        "validate": false
+      },
+      "response": {
+        "wrapper": "doc",
+        "declaration": true,
+        "valueAsAttributes": true
+      }
+    }
   },
   "doc": {
     "enabled": true,
