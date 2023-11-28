@@ -9,7 +9,7 @@ const bajoWebRestapiPreHandler = {
     reply.header('Content-Language', req.lang)
     if (cfg.format.asExt) {
       if (!cfg.format.supported.includes(req.params.format)) {
-        throw error('Unsupported format \'%s\'', req.params.format, { code: 406 })
+        throw error('Unsupported format \'%s\'', req.params.format, { statusCode: 406 })
       }
     }
   }
