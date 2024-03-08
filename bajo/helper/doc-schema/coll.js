@@ -7,6 +7,7 @@ async function buildPropsReqs (schema, method) {
     if (['boolean'].includes(p.type)) type = 'boolean'
     if (['integer', 'smallint'].includes(p.type)) type = 'integer'
     if (['object'].includes(p.type)) type = 'object'
+    if (['array'].includes(p.type)) type = 'array'
     properties[p.name] = { type }
     if (!p.required) properties[p.name].nullable = true
     else if (method === 'create' && p.name !== 'id') required.push(p.name)

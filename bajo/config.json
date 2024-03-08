@@ -71,5 +71,9 @@
   },
   "multipart": {
   },
+  "cors": {},
+  "helmet": {},
+  "compress": false,
+  "rateLimit": false,
   "dependencies": ["bajo-db"]
 }

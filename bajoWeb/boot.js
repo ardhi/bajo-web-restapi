@@ -22,6 +22,10 @@ const boot = {
     const routeHook = await importModule(`${cfgWeb.dir.pkg}/lib/route-hook.js`)
     const handleMultipart = await importModule(`${cfgWeb.dir.pkg}/lib/handle-multipart-body.js`)
     const handleXmlBody = await importModule(`${cfgWeb.dir.pkg}/lib/handle-xml-body.js`)
+    const handleCors = await importModule(`${cfgWeb.dir.pkg}/lib/handle-cors.js`)
+    const handleHelmet = await importModule(`${cfgWeb.dir.pkg}/lib/handle-helmet.js`)
+    const handleCompress = await importModule(`${cfgWeb.dir.pkg}/lib/handle-compress.js`)
+    const handleRateLimit = await importModule(`${cfgWeb.dir.pkg}/lib/handle-rate-limit.js`)
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
@@ -32,7 +36,11 @@ const boot = {
       }
       await ctx.register(accepts)
       await ctx.register(bodyParser)
+      await handleRateLimit.call(this, ctx, cfg.rateLimit)
+      await handleCors.call(this, ctx, cfg.cors)
+      await handleHelmet.call(this, ctx, cfg.helmet)
       await handleMultipart.call(this, ctx, cfg.multipart)
+      await handleCompress.call(this, ctx, cfg.compress)
       await handleResponse.call(this, ctx)
       await error.call(this, ctx)
       await docSchemaGeneral(ctx)
