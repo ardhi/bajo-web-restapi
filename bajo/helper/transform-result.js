@@ -5,7 +5,7 @@ async function reformat ({ data, req, reply, options = {} }) {
   const newData = {}
   forOwn(data, (v, k) => {
     let key = get(cfg, `responseKey.${k}`, k)
-    if (options.forFind && k === 'data') key = get(cfg, 'responseKey.rows')
+    if (options.forFind && k === 'data') key = get(cfg, 'responseKey.data')
     newData[key] = v
   })
   return newData

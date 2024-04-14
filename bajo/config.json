@@ -57,7 +57,6 @@
   },
   "responseKey": {
     "data": "data",
-    "rows": "data",
     "oldData": "oldData",
     "page": "page",
     "count": "count",

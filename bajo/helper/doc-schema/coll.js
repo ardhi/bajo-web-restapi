@@ -1,35 +1,64 @@
-async function buildPropsReqs (schema, method) {
+function getType (input) {
+  let type = 'string'
+  if (['float', 'double'].includes(input)) type = 'number'
+  if (['boolean'].includes(input)) type = 'boolean'
+  if (['integer', 'smallint'].includes(input)) type = 'integer'
+  if (['object'].includes(input)) type = 'object'
+  if (['array'].includes(input)) type = 'array'
+  return type
+}
+
+async function buildPropsReqs (schema, method, hidden = []) {
+  const { getSchema } = this.bajoDb.helper
   const properties = {}
   const required = []
+  const rels = {}
   for (const p of schema.properties) {
-    let type = 'string'
-    if (['float', 'double'].includes(p.type)) type = 'number'
-    if (['boolean'].includes(p.type)) type = 'boolean'
-    if (['integer', 'smallint'].includes(p.type)) type = 'integer'
-    if (['object'].includes(p.type)) type = 'object'
-    if (['array'].includes(p.type)) type = 'array'
-    properties[p.name] = { type }
+    if (hidden.includes(p.name)) continue
+    properties[p.name] = { type: getType(p.type) }
     if (!p.required) properties[p.name].nullable = true
     else if (method === 'create' && p.name !== 'id') required.push(p.name)
     if (['datetime'].includes(p.type)) properties[p.name].format = 'date-time'
+    if (p.rel) {
+      for (const key in p.rel) {
+        const val = p.rel[key]
+        if (val.fields.length === 0) continue
+        const props = { type: 'object', properties: {} }
+        const relschema = await getSchema(val.schema)
+        for (const f of val.fields) {
+          const item = relschema.properties.find(s => s.name === f)
+          props.properties[item.name] = { type: getType(item.type) }
+        }
+        if (Object.keys(props.properties).length > 0) {
+          if (val.type === 'one-to-many') {
+            rels[key] = { type: 'array', items: props }
+          } else if (val.type === 'one-to-one') {
+            rels[key] = props
+          }
+        }
+      }
+    }
   }
+  if (Object.keys(rels).length > 0) properties._rel = { type: 'object', properties: rels }
   return { properties, required }
 }
 
-async function buildResponse (ctx, schema, method) {
+async function buildResponse (ctx, schema, method, hidden) {
   const { print, getConfig, importPkg } = this.bajo.helper
   const { transformResult, docSchemaLib, docSchemaForFind } = this.bajoWebRestapi.helper
   const { merge, cloneDeep } = await importPkg('lodash-es')
   const cfgWeb = getConfig('bajoWeb')
-  const { properties } = await buildPropsReqs.call(this, schema, method)
+  const { properties } = await buildPropsReqs.call(this, schema, method, hidden)
 
-  async function buildData (keys) {
+  async function buildData (keys, noRels) {
     const data = {}
     for (const k of keys) {
       const name = 'coll' + schema.name
+      const props = cloneDeep(properties)
+      if (noRels) delete props._rel
       await docSchemaLib(ctx, name, {
         type: 'object',
-        properties: cloneDeep(properties)
+        properties: props
       })
       data[k] = { $ref: name + '#' }
     }
@@ -58,19 +87,22 @@ async function buildResponse (ctx, schema, method) {
         type: 'array',
         items: (await buildData.call(this, ['data'])).data
       }
-    } else result['2xx'] = (await buildData.call(this, ['data'])).data
+    } else if (method === 'get') result['2xx'] = (await buildData.call(this, ['data'])).data
+    else result['2xx'] = (await buildData.call(this, ['data'], true)).data
     return result
   }
   const success = { type: 'boolean', default: true }
   let statusCode = { type: 'integer', default: 200 }
-  if (['create', 'get'].includes(method)) {
-    if (method === 'create') statusCode = 201
+  if (method === 'get') {
     result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
+  } else if (method === 'create') {
+    statusCode = 201
+    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data'], true), { success, statusCode }) })
   } else if (['update', 'replace'].includes(method)) {
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data', 'oldData']), { success, statusCode }) })
-  } else if (['remove'].includes(method)) {
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['oldData']), { success, statusCode }) })
-  } else if (['find'].includes(method)) {
+    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data', 'oldData'], true), { success, statusCode }) })
+  } else if (method === 'remove') {
+    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['oldData'], true), { success, statusCode }) })
+  } else if (method === 'find') {
     result['2xx'].properties = await transformResult({
       data: await docSchemaForFind(ctx, { type: 'object', properties }),
       options: { forFind: true }
@@ -79,7 +111,7 @@ async function buildResponse (ctx, schema, method) {
   return result
 }
 
-async function docSchema ({ coll, method, ctx, options = {} }) {
+async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
   const { getConfig, importPkg } = this.bajo.helper
   const { docSchemaDescription, docSchemaLib } = this.bajoWebRestapi.helper
   const { getInfo } = this.bajoDb.helper
@@ -98,7 +130,7 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
     out.params = { $ref: 'paramsId#' }
   }
   if (['update'].includes(method)) {
-    const { properties } = await buildPropsReqs.call(this, schema, method)
+    const { properties } = await buildPropsReqs.call(this, schema, method, hidden)
     const name = 'coll' + schema.name + 'Update'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -107,7 +139,7 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
     out.body = { $ref: name + '#' }
   }
   if (['replace'].includes(method)) {
-    const { properties, required } = await buildPropsReqs.call(this, schema, method)
+    const { properties, required } = await buildPropsReqs.call(this, schema, method, hidden)
     const name = 'coll' + schema.name + 'Replace'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -117,7 +149,7 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
     out.body = { $ref: name + '#' }
   }
   if (['create'].includes(method)) {
-    const { properties, required } = await buildPropsReqs.call(this, schema, method)
+    const { properties, required } = await buildPropsReqs.call(this, schema, method, hidden)
     const name = 'coll' + schema.name + 'Create'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -127,7 +159,7 @@ async function docSchema ({ coll, method, ctx, options = {} }) {
     out.body = { $ref: name + '#' }
     out.querystring = { $ref: 'qsFields#' }
   }
-  out.response = await buildResponse.call(this, ctx, schema, method)
+  out.response = await buildResponse.call(this, ctx, schema, method, hidden)
   return out
 }
 
