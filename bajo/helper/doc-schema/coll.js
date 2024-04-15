@@ -111,7 +111,7 @@ async function buildResponse (ctx, schema, method, hidden) {
   return result
 }
 
-async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
+async function docSchemaColl ({ coll, method, ctx, options = {} }) {
   const { getConfig, importPkg } = this.bajo.helper
   const { docSchemaDescription, docSchemaLib } = this.bajoWebRestapi.helper
   const { getInfo } = this.bajoDb.helper
@@ -127,10 +127,10 @@ async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
   }
   if (['get', 'update', 'replace', 'remove'].includes(method)) {
     out.querystring = { $ref: 'qsFields#' }
-    out.params = { $ref: 'paramsId#' }
+    if (!options.noId) out.params = { $ref: 'paramsId#' }
   }
   if (['update'].includes(method)) {
-    const { properties } = await buildPropsReqs.call(this, schema, method, hidden)
+    const { properties } = await buildPropsReqs.call(this, schema, method, options.hidden)
     const name = 'coll' + schema.name + 'Update'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -139,7 +139,7 @@ async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
     out.body = { $ref: name + '#' }
   }
   if (['replace'].includes(method)) {
-    const { properties, required } = await buildPropsReqs.call(this, schema, method, hidden)
+    const { properties, required } = await buildPropsReqs.call(this, schema, method, options.hidden)
     const name = 'coll' + schema.name + 'Replace'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -149,7 +149,7 @@ async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
     out.body = { $ref: name + '#' }
   }
   if (['create'].includes(method)) {
-    const { properties, required } = await buildPropsReqs.call(this, schema, method, hidden)
+    const { properties, required } = await buildPropsReqs.call(this, schema, method, options.hidden)
     const name = 'coll' + schema.name + 'Create'
     await docSchemaLib(ctx, name, {
       type: 'object',
@@ -159,8 +159,8 @@ async function docSchema ({ coll, method, ctx, options = {}, hidden }) {
     out.body = { $ref: name + '#' }
     out.querystring = { $ref: 'qsFields#' }
   }
-  out.response = await buildResponse.call(this, ctx, schema, method, hidden)
+  out.response = await buildResponse.call(this, ctx, schema, method, options.hidden)
   return out
 }
 
-export default docSchema
+export default docSchemaColl
