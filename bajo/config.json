@@ -1,8 +1,6 @@
 {
   "alias": "restapi",
   "prefix": "api",
-  "formats": ["json"],
-  "formatAsExt": false,
   "mountAppAsRoot": true,
   "exposeHead": true,
   "enablePatch": false,
@@ -74,5 +72,6 @@
   "helmet": {},
   "compress": false,
   "rateLimit": false,
+  "disabled": [],
   "dependencies": ["bajo-db", "bajo-extra"]
 }
