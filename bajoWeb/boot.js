@@ -10,10 +10,9 @@ import handleResponse from '../lib/handle-response.js'
 const boot = {
   level: 10,
   handler: async function () {
-    const { getConfig, importPkg, eachPlugins, importModule, runHook } = this.bajo.helper
+    const { fastGlob, getConfig, importPkg, eachPlugins, importModule, runHook } = this.bajo.helper
     const { docSchemaGeneral } = this.bajoWebRestapi.helper
-    const [fastGlob, bodyParser, accepts] = await importPkg('fast-glob',
-      'bajoWeb:@fastify/formbody', 'bajoWeb:@fastify/accepts')
+    const [bodyParser, accepts] = await importPkg('bajoWeb:@fastify/formbody', 'bajoWeb:@fastify/accepts')
     const cfg = getConfig('bajoWebRestapi')
     const cfgWeb = getConfig('bajoWeb', { full: true })
     const pathPrefix = 'bajoWebRestapi/route'

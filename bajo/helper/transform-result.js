@@ -1,6 +1,6 @@
-async function reformat ({ data, req, reply, options = {} }) {
-  const { importPkg, getConfig } = this.bajo.helper
-  const { forOwn, get } = await importPkg('lodash-es')
+function reformat ({ data, req, reply, options = {} }) {
+  const { getConfig } = this.bajo.helper
+  const { forOwn, get } = this.bajo.helper._
   const cfg = getConfig('bajoWebRestapi')
   const newData = {}
   forOwn(data, (v, k) => {
@@ -11,9 +11,9 @@ async function reformat ({ data, req, reply, options = {} }) {
   return newData
 }
 
-async function returnError ({ data, req, reply, options = {} }) {
-  const { print, importPkg, getConfig, pascalCase } = this.bajo.helper
-  const { map, kebabCase, upperFirst, keys, each, get, isEmpty } = await importPkg('lodash-es')
+function returnError ({ data, req, reply, options = {} }) {
+  const { print, getConfig, pascalCase } = this.bajo.helper
+  const { map, kebabCase, upperFirst, keys, each, get, isEmpty } = this.bajo.helper._
   const cfg = getConfig('bajoWebRestapi', { full: true })
   const cfgWeb = getConfig('bajoWeb')
   const restapi = pascalCase(cfg.alias)
@@ -32,9 +32,9 @@ async function returnError ({ data, req, reply, options = {} }) {
   return reformat.call(this, { data: result, req, reply, options })
 }
 
-async function returnSuccess ({ data, req, reply, options = {} }) {
-  const { getConfig, importPkg, pascalCase } = this.bajo.helper
-  const { each, keys, omit, get } = await importPkg('lodash-es')
+function returnSuccess ({ data, req, reply, options = {} }) {
+  const { getConfig, pascalCase } = this.bajo.helper
+  const { each, keys, omit, get } = this.bajo.helper._
   const cfg = getConfig('bajoWebRestapi', { full: true })
   const cfgWeb = getConfig('bajoWeb')
   const restapi = pascalCase(cfg.alias)
@@ -51,10 +51,10 @@ async function returnSuccess ({ data, req, reply, options = {} }) {
   return reformat.call(this, { data, req, reply, options })
 }
 
-async function transformResult ({ data, req, reply, options = {} }) {
+function transformResult ({ data, req, reply, options = {} }) {
   const isError = data instanceof Error
-  if (isError) return await returnError.call(this, { data, req, reply, options })
-  return await returnSuccess.call(this, { data, req, reply, options })
+  if (isError) return returnError.call(this, { data, req, reply, options })
+  return returnSuccess.call(this, { data, req, reply, options })
 }
 
 export default transformResult

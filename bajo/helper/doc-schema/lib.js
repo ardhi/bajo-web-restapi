@@ -1,6 +1,5 @@
 async function docSchemaLib (ctx, name, obj) {
-  const { importPkg } = this.bajo.helper
-  const { merge } = await importPkg('lodash-es')
+  const { merge } = this.bajo.helper._
   if (ctx.getSchema(name)) return
   const value = merge({}, obj, { $id: name })
   ctx.addSchema(value)

@@ -25,7 +25,7 @@ async function buildPropsReqs ({ schema, method, options = {} }) {
         const val = p.rel[key]
         if (val.fields.length === 0) continue
         const props = { type: 'object', properties: {} }
-        const relschema = await getSchema(val.schema)
+        const relschema = getSchema(val.schema)
         for (const f of val.fields) {
           const item = relschema.properties.find(s => s.name === f)
           props.properties[item.name] = { type: getType(item.type) }
@@ -45,9 +45,9 @@ async function buildPropsReqs ({ schema, method, options = {} }) {
 }
 
 async function buildResponse ({ ctx, schema, method, options }) {
-  const { print, getConfig, importPkg } = this.bajo.helper
+  const { print, getConfig } = this.bajo.helper
   const { transformResult, docSchemaLib, docSchemaForFind } = this.bajoWebRestapi.helper
-  const { merge, cloneDeep } = await importPkg('lodash-es')
+  const { merge, cloneDeep } = this.bajo.helper._
   const cfgWeb = getConfig('bajoWeb')
   const { properties } = await buildPropsReqs.call(this, { schema, method, options })
 
@@ -94,16 +94,16 @@ async function buildResponse ({ ctx, schema, method, options }) {
   const success = { type: 'boolean', default: true }
   const statusCode = { type: 'integer', default: 200 }
   if (method === 'get') {
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
+    result['2xx'].properties = transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
   } else if (method === 'create') {
     statusCode.default = 201
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
+    result['2xx'].properties = transformResult({ data: merge({}, await buildData.call(this, ['data']), { success, statusCode }) })
   } else if (['update', 'replace'].includes(method)) {
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['data', 'oldData']), { success, statusCode }) })
+    result['2xx'].properties = transformResult({ data: merge({}, await buildData.call(this, ['data', 'oldData']), { success, statusCode }) })
   } else if (method === 'remove') {
-    result['2xx'].properties = await transformResult({ data: merge({}, await buildData.call(this, ['oldData']), { success, statusCode }) })
+    result['2xx'].properties = transformResult({ data: merge({}, await buildData.call(this, ['oldData']), { success, statusCode }) })
   } else if (method === 'find') {
-    result['2xx'].properties = await transformResult({
+    result['2xx'].properties = transformResult({
       data: await docSchemaForFind(ctx, { type: 'object', properties }),
       options: { forFind: true }
     })
@@ -112,11 +112,11 @@ async function buildResponse ({ ctx, schema, method, options }) {
 }
 
 async function docSchemaColl ({ coll, method, ctx, options = {} }) {
-  const { getConfig, importPkg } = this.bajo.helper
+  const { getConfig } = this.bajo.helper
   const { docSchemaDescription, docSchemaLib } = this.bajoWebRestapi.helper
   const { getInfo } = this.bajoDb.helper
-  const { schema } = await getInfo(coll)
-  const { omit } = await importPkg('lodash-es')
+  const { schema } = getInfo(coll)
+  const { omit } = this.bajo.helper._
   const cfg = getConfig(schema.plugin, { full: true })
   const out = {
     description: options.description ?? docSchemaDescription(method),

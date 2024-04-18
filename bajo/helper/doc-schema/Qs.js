@@ -1,6 +1,6 @@
 async function buildParams (ctx, paramName, ...args) {
-  const { print, importPkg } = this.bajo.helper
-  const { each, isEmpty } = await importPkg('lodash-es')
+  const { print } = this.bajo.helper
+  const { each, isEmpty } = this.bajo.helper._
   const { docSchemaLib } = this.bajoWebRestapi.helper
   const item = {
     type: 'object',

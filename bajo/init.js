@@ -1,6 +1,5 @@
 async function start () {
-  const { importPkg } = this.bajo.helper
-  const { uniq } = await importPkg('lodash-es')
+  const { uniq } = this.bajo.helper._
   this.bajoWebRestapi.config.format.supported.push('json')
   this.bajoWebRestapi.config.format.supported = uniq(this.bajoWebRestapi.config.format.supported)
 }

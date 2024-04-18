@@ -1,7 +1,7 @@
 async function buildErrResp (ctx) {
-  const { importPkg, getConfig } = this.bajo.helper
+  const { getConfig } = this.bajo.helper
   const { docSchemaLib } = this.bajoWebRestapi.helper
-  const { cloneDeep, merge, each, get } = await importPkg('lodash-es')
+  const { cloneDeep, merge, each, get } = this.bajo.helper._
   const cfg = getConfig('bajoWebRestapi')
   const cfgWeb = getConfig('bajoWeb')
   const def = {

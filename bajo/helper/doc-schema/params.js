@@ -1,6 +1,6 @@
 async function buildParams (ctx, paramName, ...args) {
-  const { print, importPkg, getConfig } = this.bajo.helper
-  const { each, isEmpty, keys, last, isBoolean } = await importPkg('lodash-es')
+  const { print, getConfig } = this.bajo.helper
+  const { each, isEmpty, keys, last, isBoolean } = this.bajo.helper._
   const { docSchemaLib } = this.bajoWebRestapi.helper
   const cfgWeb = getConfig('bajoWeb')
   let transform = false
