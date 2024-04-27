@@ -3,8 +3,7 @@ const bajoWebRestapiPreHandler = {
   handler: async function (ctx, req, reply) {
     const { getConfig, importModule, error } = this.bajo.helper
     const cfg = getConfig('bajoWebRestapi')
-    const cfgWeb = getConfig('bajoWeb', { full: true })
-    const attachI18N = await importModule(`${cfgWeb.dir.pkg}/lib/attach-i18n.js`)
+    const attachI18N = await importModule('bajoWeb:/lib/attach-i18n.js')
     await attachI18N.call(this, cfg.i18n.detectors, req, reply)
     reply.header('Content-Language', req.lang)
     if (cfg.format.asExt && req.params.format) {

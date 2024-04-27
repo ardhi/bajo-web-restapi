@@ -14,17 +14,16 @@ const boot = {
     const { docSchemaGeneral } = this.bajoWebRestapi.helper
     const [bodyParser, accepts] = await importPkg('bajoWeb:@fastify/formbody', 'bajoWeb:@fastify/accepts')
     const cfg = getConfig('bajoWebRestapi')
-    const cfgWeb = getConfig('bajoWeb', { full: true })
     const pathPrefix = 'bajoWebRestapi/route'
     let prefix = cfg.prefix === '' ? '' : ('/' + cfg.prefix)
     if (cfg.i18n.detectors.includes('path')) prefix = `/:lang${prefix}`
-    const routeHook = await importModule(`${cfgWeb.dir.pkg}/lib/route-hook.js`)
-    const handleMultipart = await importModule(`${cfgWeb.dir.pkg}/lib/handle-multipart-body.js`)
-    const handleXmlBody = await importModule(`${cfgWeb.dir.pkg}/lib/handle-xml-body.js`)
-    const handleCors = await importModule(`${cfgWeb.dir.pkg}/lib/handle-cors.js`)
-    const handleHelmet = await importModule(`${cfgWeb.dir.pkg}/lib/handle-helmet.js`)
-    const handleCompress = await importModule(`${cfgWeb.dir.pkg}/lib/handle-compress.js`)
-    const handleRateLimit = await importModule(`${cfgWeb.dir.pkg}/lib/handle-rate-limit.js`)
+    const routeHook = await importModule('bajoWeb:/lib/route-hook.js')
+    const handleMultipart = await importModule('bajoWeb:/lib/handle-multipart-body.js')
+    const handleXmlBody = await importModule('bajoWeb:/lib/handle-xml-body.js')
+    const handleCors = await importModule('bajoWeb:/lib/handle-cors.js')
+    const handleHelmet = await importModule('bajoWeb:/lib/handle-helmet.js')
+    const handleCompress = await importModule('bajoWeb:/lib/handle-compress.js')
+    const handleRateLimit = await importModule('bajoWeb:/lib/handle-rate-limit.js')
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
