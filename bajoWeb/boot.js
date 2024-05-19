@@ -7,10 +7,16 @@ import error from '../lib/error.js'
 import doc from '../lib/doc.js'
 import handleResponse from '../lib/handle-response.js'
 
+const routeActions = { routeByCollBuilder, routeByVerb }
+
+function formatExt (item) {
+  return item + '.:format'
+}
+
 const boot = {
   level: 10,
   handler: async function () {
-    const { fastGlob, getConfig, importPkg, eachPlugins, importModule, runHook } = this.bajo.helper
+    const { fastGlob, getConfig, importPkg, eachPlugins, importModule, runHook, log } = this.bajo.helper
     const { docSchemaGeneral } = this.bajoWebRestapi.helper
     const [bodyParser, accepts] = await importPkg('bajoWeb:@fastify/formbody', 'bajoWeb:@fastify/accepts')
     const cfg = getConfig('bajoWebRestapi')
@@ -24,6 +30,7 @@ const boot = {
     const handleHelmet = await importModule('bajoWeb:/lib/handle-helmet.js')
     const handleCompress = await importModule('bajoWeb:/lib/handle-compress.js')
     const handleRateLimit = await importModule('bajoWeb:/lib/handle-rate-limit.js')
+    const reroutedPath = await importModule('bajoWeb:/lib/rerouted-path.js')
     await this.bajoWeb.instance.register(async (ctx) => {
       this.bajoWebRestapi.instance = ctx
       await runHook('bajoWebRestapi:afterCreateContext', ctx)
@@ -49,18 +56,35 @@ const boot = {
       if (cfg.enablePatch) actions.push('replace')
       await runHook('bajoWebRestapi:beforeCreateRoutes', ctx)
       await eachPlugins(async function ({ dir, alias, plugin }) {
-        const appPrefix = plugin === 'app' && cfg.mountAppAsRoot ? '' : alias
+        const appPrefix = '/' + (plugin === 'app' && cfg.mountAppAsRoot ? '' : alias)
         const pattern = [
           `${dir}/${pathPrefix}/**/{${actions.join(',')}}.js`,
           `${dir}/${pathPrefix}/**/coll-builder.*`
         ]
         const files = await fastGlob(pattern)
         if (files.length === 0) return undefined
-        await ctx.register(async (childCtx) => {
+        await ctx.register(async (appCtx) => {
           for (const file of files) {
             const base = path.basename(file, path.extname(file))
-            if (base === 'coll-builder') await routeByCollBuilder.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
-            else await routeByVerb.call(this, { file, ctx, childCtx, dir, pathPrefix, plugin, alias, prefix, appPrefix })
+            const action = base === 'coll-builder' ? 'routeByCollBuilder' : 'routeByVerb'
+            let mods = await routeActions[action].call(this, { file, appCtx, ctx, dir, pathPrefix, plugin, alias })
+            if (!Array.isArray(mods)) mods = [mods]
+            for (const mod of mods) {
+              const fullPath = appPrefix === '/' ? mod.url : (appPrefix + mod.url)
+              const isRouteDisabled = await importModule('bajoWeb:/lib/is-route-disabled.js')
+              if (await isRouteDisabled.call(this, fullPath, mod.method, cfg.disabled)) {
+                log.warn('Route %s (%s) is disabled', `${prefix}${fullPath}`, mod.method)
+                continue
+              }
+              const rpath = await reroutedPath.call(this, fullPath, cfg.rerouted)
+              if (cfg.format.asExt) mod.url = formatExt(mod.url)
+              if (rpath) {
+                mod.config.pathReroutedTo = rpath
+                log.warn('Rerouted %s -> %s', `${prefix}${fullPath}`, `${prefix}${rpath}`)
+                mod.url = cfg.format.asExt ? formatExt(rpath) : rpath
+                await ctx.route(mod)
+              } else await appCtx.route(mod)
+            }
           }
         }, { prefix: appPrefix })
       })

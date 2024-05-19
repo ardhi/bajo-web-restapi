@@ -73,5 +73,6 @@
   "compress": false,
   "rateLimit": false,
   "disabled": [],
+  "rerouted": {},
   "dependencies": ["bajo-db", "bajo-extra"]
 }
