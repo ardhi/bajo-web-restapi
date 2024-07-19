@@ -1,7 +1,7 @@
 async function start () {
-  const { uniq } = this.bajo.helper._
-  this.bajoWebRestapi.config.format.supported.push('json')
-  this.bajoWebRestapi.config.format.supported = uniq(this.bajoWebRestapi.config.format.supported)
+  const { uniq } = this.app.bajo.lib._
+  this.config.format.supported.push('json')
+  this.config.format.supported = uniq(this.config.format.supported)
 }
 
 export default start

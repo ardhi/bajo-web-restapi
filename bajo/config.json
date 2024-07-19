@@ -66,6 +66,8 @@
     "message": "message",
     "details": "details"
   },
+  "mapSlash": "~",
+  "mapDot": ",",
   "multipart": {
   },
   "cors": {},

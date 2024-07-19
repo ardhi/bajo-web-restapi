@@ -7,8 +7,7 @@ const desc = {
 }
 
 function docDescription (method) {
-  const { print } = this.bajo.helper
-  return print.__(desc[method])
+  return this.print.write(desc[method])
 }
 
 export default docDescription

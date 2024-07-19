@@ -1,30 +1,29 @@
 function reformat ({ data, req, reply, options = {} }) {
-  const { getConfig } = this.bajo.helper
-  const { forOwn, get } = this.bajo.helper._
-  const cfg = getConfig('bajoWebRestapi')
+  const { forOwn, get } = this.app.bajo.lib._
   const newData = {}
   forOwn(data, (v, k) => {
-    let key = get(cfg, `responseKey.${k}`, k)
-    if (options.forFind && k === 'data') key = get(cfg, 'responseKey.data')
+    let key = get(this.config, `responseKey.${k}`, k)
+    if (options.forFind && k === 'data') key = get(this.config, 'responseKey.data')
     newData[key] = v
   })
   return newData
 }
 
 function returnError ({ data, req, reply, options = {} }) {
-  const { print, getConfig, pascalCase } = this.bajo.helper
-  const { map, kebabCase, upperFirst, keys, each, get, isEmpty } = this.bajo.helper._
-  const cfg = getConfig('bajoWebRestapi', { full: true })
-  const cfgWeb = getConfig('bajoWeb')
-  const restapi = pascalCase(cfg.alias)
-  data.error = print.__(map(kebabCase(data.constructor.name).split('-'), s => upperFirst(s)).join(' '))
+  const { pascalCase } = this.app.bajo
+  const { last, map, kebabCase, upperFirst, keys, each, get, isEmpty } = this.app.bajo.lib._
+  const cfg = this.config
+  const cfgWeb = this.app.bajoWeb.config
+  const errNames = kebabCase(data.constructor.name).split('-')
+  if (last(errNames) === 'error') errNames.pop()
+  data.error = this.print.write(map(errNames, s => upperFirst(s)).join(' '))
   data.success = false
   data.statusCode = data.statusCode ?? 500
   if (reply && cfgWeb.dbColl.dataOnly) {
     each(keys(data), k => {
       const key = get(cfg, `responseKey.${k}`, k)
       if (k === 'details' && !isEmpty(data[k])) data[k] = JSON.stringify(data[k])
-      reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])
+      reply.header(`X-${pascalCase(this.alias)}-${pascalCase(key)}`, data[k])
     })
   }
   reply.code(data.statusCode)
@@ -33,17 +32,16 @@ function returnError ({ data, req, reply, options = {} }) {
 }
 
 function returnSuccess ({ data, req, reply, options = {} }) {
-  const { getConfig, pascalCase } = this.bajo.helper
-  const { each, keys, omit, get } = this.bajo.helper._
-  const cfg = getConfig('bajoWebRestapi', { full: true })
-  const cfgWeb = getConfig('bajoWeb')
-  const restapi = pascalCase(cfg.alias)
+  const { pascalCase } = this.app.bajo
+  const { each, keys, omit, get } = this.app.bajo.lib._
+  const cfg = this.config
+  const cfgWeb = this.app.bajoWeb.config
   if (reply) {
     reply.code(req.method.toUpperCase() === 'POST' ? 201 : 200)
     if (cfgWeb.dbColl.dataOnly) {
       each(keys(omit(data, ['data'])), k => {
         const key = get(cfg, `responseKey.${k}`, k)
-        reply.header(`X-${restapi}-${pascalCase(key)}`, data[k])
+        reply.header(`X-${pascalCase(this.alias)}-${pascalCase(key)}`, data[k])
       })
       return data.data
     }

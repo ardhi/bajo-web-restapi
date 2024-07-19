@@ -1,9 +1,7 @@
 async function buildErrResp (ctx) {
-  const { getConfig } = this.bajo.helper
-  const { docSchemaLib } = this.bajoWebRestapi.helper
-  const { cloneDeep, merge, each, get } = this.bajo.helper._
-  const cfg = getConfig('bajoWebRestapi')
-  const cfgWeb = getConfig('bajoWeb')
+  const { cloneDeep, merge, each, get } = this.app.bajo.lib._
+  const cfg = this.config
+  const cfgWeb = this.app.bajoWeb.config
   const def = {
     type: 'object',
     properties: {
@@ -45,17 +43,14 @@ async function buildErrResp (ctx) {
       props[key] = item.properties[k]
     })
     item.properties = props
-    await docSchemaLib(ctx, type + 'Resp', item)
+    await this.docSchemaLib(ctx, type + 'Resp', item)
   }
 }
 
 async function buildFilter (ctx) {
-  const { getConfig } = this.bajo.helper
-  const { docSchemaParams } = this.bajoWebRestapi.helper
-  const cfgDb = getConfig('bajoDb')
-  await docSchemaParams(ctx, 'qsFilter',
+  await this.docSchemaParams(ctx, 'qsFilter',
     'query||NQL/Mongo Query. Leave empty to disable query',
-    'limit|integer|Number of records per page. Must be >= 1|' + cfgDb.defaults.filter.limit,
+    'limit|integer|Number of records per page. Must be >= 1|' + this.app.bajoDb.config.defaults.filter.limit,
     'page|integer|Desired page number. Must be >= 1|1',
     'sort||Order of records, format: &lt;field&gt;:&lt;dir&gt;[,&lt;field&gt;:&lt;dir&gt;,[...]]',
     'fields||Comma delimited fields to show. Leave empty to show all fields',
@@ -64,16 +59,14 @@ async function buildFilter (ctx) {
 }
 
 async function buildFields (ctx) {
-  const { docSchemaParams } = this.bajoWebRestapi.helper
-  await docSchemaParams(ctx, 'qsFields',
+  await this.docSchemaParams(ctx, 'qsFields',
     'fields||Comma delimited fields to show. Leave empty to show all fields',
     true
   )
 }
 
 async function buildParamsId (ctx) {
-  const { docSchemaParams } = this.bajoWebRestapi.helper
-  await docSchemaParams(ctx, 'paramsId', 'id||Record ID')
+  await this.docSchemaParams(ctx, 'paramsId', 'id||Record ID')
 }
 
 async function docSchemaGeneral (ctx) {

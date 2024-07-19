@@ -1,8 +1,6 @@
 async function buildParams (ctx, paramName, ...args) {
-  const { print, getConfig } = this.bajo.helper
-  const { each, isEmpty, keys, last, isBoolean } = this.bajo.helper._
-  const { docSchemaLib } = this.bajoWebRestapi.helper
-  const cfgWeb = getConfig('bajoWeb')
+  const { each, isEmpty, keys, last, isBoolean } = this.app.bajo.lib._
+  const cfgWeb = this.app.bajoWeb.config
   let transform = false
   if (isBoolean(last(args))) {
     transform = args.pop()
@@ -14,7 +12,7 @@ async function buildParams (ctx, paramName, ...args) {
   each(args, a => {
     let [name, type, description, def] = a.split('|')
     if (isEmpty(type)) type = 'string'
-    item.properties[name] = { type, description: print.__(description), default: def }
+    item.properties[name] = { type, description: this.print.write(description), default: def }
   })
   if (transform) {
     each(keys(cfgWeb.qsKey), k => {
@@ -24,7 +22,7 @@ async function buildParams (ctx, paramName, ...args) {
       delete item.properties[k]
     })
   }
-  if (!isEmpty(args)) await docSchemaLib(ctx, paramName, item)
+  if (!isEmpty(args)) await this.docSchemaLib(ctx, paramName, item)
 }
 
 export default buildParams
