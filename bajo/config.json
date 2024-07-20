@@ -24,35 +24,6 @@
       }
     }
   },
-  "doc": {
-    "enabled": true,
-    "swagger": {
-      "openapi": {
-        "info": {
-          "title": "API Documentation"
-        },
-        "components": {
-          "securitySchemes": {}
-        },
-        "security": []
-      },
-      "hideUntagged": true
-    },
-    "swaggerUi": {
-      "routePrefix": "documentation",
-      "uiConfig": {
-        "deepLinking": true,
-        "displayRequestDuration": true,
-        "filter": true
-      },
-      "staticCSP": true,
-      "transformSpecificationClone": true,
-      "exposeRoute": true,
-      "theme": {
-        "title": "API Documentation"
-      }
-    }
-  },
   "responseKey": {
     "data": "data",
     "oldData": "oldData",

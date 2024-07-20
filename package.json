@@ -25,9 +25,5 @@
   "bugs": {
     "url": "https://github.com/ardhi/bajo-web-restapi/issues"
   },
-  "homepage": "https://github.com/ardhi/bajo-web-restapi#readme",
-  "dependencies": {
-    "@fastify/swagger": "^8.8.0",
-    "@fastify/swagger-ui": "^1.9.3"
-  }
+  "homepage": "https://github.com/ardhi/bajo-web-restapi#readme"
 }

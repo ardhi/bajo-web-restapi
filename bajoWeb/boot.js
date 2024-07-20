@@ -4,7 +4,7 @@ import routeByCollBuilder from '../lib/route-by-coll-builder.js'
 import routeByVerb from '../lib/route-by-verb.js'
 import notFound from '../lib/not-found.js'
 import error from '../lib/error.js'
-import doc from '../lib/doc.js'
+import subApp from '../lib/sub-app.js'
 import handleResponse from '../lib/handle-response.js'
 
 const routeActions = { routeByCollBuilder, routeByVerb }
@@ -49,10 +49,6 @@ const boot = {
       await handleCompress.call(this, ctx, cfg.compress)
       await handleResponse.call(this, ctx)
       await error.call(this, ctx)
-      await this.docSchemaGeneral(ctx)
-      if (cfg.doc.enabled) {
-        await doc.call(this, ctx)
-      }
       const actions = ['find', 'get', 'create', 'update', 'remove']
       if (cfg.enablePatch) actions.push('replace')
       await runHook(`${this.name}:beforeCreateRoutes`, ctx)
@@ -90,6 +86,7 @@ const boot = {
         }, { prefix: appPrefix })
       })
       await runHook(`${this.name}:afterCreateRoutes`, ctx)
+      await subApp.call(this, ctx)
       await notFound.call(this, ctx)
     }, { prefix })
   }
