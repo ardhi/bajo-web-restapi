@@ -6,7 +6,7 @@ Plugin name: **bajoWebRestapi**, alias: **restapi**
 
 > <br />**Attention**: I do NOT accept any pull request at the moment, thanks!<br /><br />
 
-Rest API support in Web framework for [Bajo Framework](https://github.com/ardhi/bajo).
+Rest API support for [Bajo](https://github.com/ardhi/bajo)'s Web Framework'.
 
 ## Installation
 
