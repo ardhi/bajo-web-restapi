@@ -49,9 +49,9 @@ const boot = {
       await handleCompress.call(this, ctx, cfg.compress)
       await handleResponse.call(this, ctx)
       await error.call(this, ctx)
+      await runHook(`${this.name}:beforeCreateRoutes`, ctx)
       const actions = ['find', 'get', 'create', 'update', 'remove']
       if (cfg.enablePatch) actions.push('replace')
-      await runHook(`${this.name}:beforeCreateRoutes`, ctx)
       await eachPlugins(async function ({ dir, alias, ns }) {
         const appPrefix = '/' + (ns === this.app.bajo.mainNs && cfg.mountAppAsRoot ? '' : alias)
         const pattern = [
