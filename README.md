@@ -1,3 +1,3 @@
 # bajo-web-restapi
 
-**DEPRECATED**: This repo has been moved & renamed to [wakatobi-rest-api](https://github.com/ardhi/wakatobi-rest-api)!
+**DEPRECATED**: This repo has been moved & renamed to [waibu-rest-api](https://github.com/ardhi/waibu-rest-api)!
